@@ -3,46 +3,7 @@ import axios from 'axios';
 import initForm from './index.js';
 import mappingValidate from './validation/index.js';
 import validateFormCheck from './validateFormCheck.js';
-
-const render = (state) => (path, value) => {
-  if (path === 'process') {
-    if (value === 'processed') {
-      const body = document.querySelector('body');
-      body.innerHTML = `<p>${state.message}</p>`;
-    }
-  }
-
-  if (path === 'inputName.validate') {
-    const inputName = document.getElementById('inputName');
-    if (value) {
-      inputName.classList.remove('is-invalid');
-      inputName.classList.add('is-valid');
-    } else {
-      inputName.classList.remove('is-valid');
-      inputName.classList.add('is-invalid');
-    }
-  }
-
-  if (path === 'inputEmail.validate') {
-    const inputEmail = document.getElementById('inputEmail');
-    if (value) {
-      inputEmail.classList.remove('is-invalid');
-      inputEmail.classList.add('is-valid');
-    } else {
-      inputEmail.classList.remove('is-valid');
-      inputEmail.classList.add('is-invalid');
-    }
-  }
-
-  if (path === 'validateForm') {
-    const submit = document.querySelector('input[type="submit"]');
-    if (value) {
-      submit.removeAttribute('disabled');
-    } else {
-      submit.setAttribute('disabled', true);
-    }
-  }
-};
+import render from './views/index.js';
 
 export default () => {
   const state = {
@@ -63,12 +24,20 @@ export default () => {
 
   const watchedState = onChange(state, render(state));
 
-  const btn = document.querySelector('.btn');
+  const form = document.getElementById('registrationForm');
   const fields = document.querySelectorAll('input[type="text"]');
 
-  btn.addEventListener('click', async () => {
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const formData = new FormData(form);
+    const registrationDataUser = {
+      name: formData.get('name'),
+      email: formData.get('email'),
+    };
+
     try {
-      const { data } = await axios.post('/users');
+      const { data } = await axios.post('/users', registrationDataUser);
       state.message = data.message;
       watchedState.process = 'processed';
     } catch {
