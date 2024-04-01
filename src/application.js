@@ -2,6 +2,7 @@ import onChange from 'on-change';
 import axios from 'axios';
 import initForm from './index.js';
 import mappingValidate from './validation/index.js';
+import validateFormCheck from './validateFormCheck.js';
 
 const render = (state) => (path, value) => {
   if (path === 'process') {
@@ -32,20 +33,30 @@ const render = (state) => (path, value) => {
       inputEmail.classList.add('is-invalid');
     }
   }
+
+  if (path === 'validateForm') {
+    const submit = document.querySelector('input[type="submit"]');
+    if (value) {
+      submit.removeAttribute('disabled');
+    } else {
+      submit.setAttribute('disabled', true);
+    }
+  }
 };
 
 export default () => {
   const state = {
     inputName: {
       validate: null,
-      error: null,
+      value: null,
     },
     inputEmail: {
       validate: null,
-      error: null,
+      value: null,
     },
     process: 'filling',
     message: null,
+    validateForm: null,
   };
 
   initForm();
@@ -72,6 +83,8 @@ export default () => {
       const fieldName = event.target.id;
       const { value } = event.target;
       watchedState[fieldName].validate = mappingValidate[fieldName](value);
+      watchedState[fieldName].value = value;
+      watchedState.validateForm = validateFormCheck(state);
     });
   });
 };
