@@ -1,6 +1,7 @@
 import onChange from 'on-change';
 import axios from 'axios';
-import renderForm from './index.js';
+import initForm from './index.js';
+import mappingValidate from './validation/index.js';
 
 const render = (state) => (path, value) => {
   if (path === 'process') {
@@ -9,27 +10,50 @@ const render = (state) => (path, value) => {
       body.innerHTML = `<p>${state.message}</p>`;
     }
   }
+
+  if (path === 'inputName.validate') {
+    const inputName = document.getElementById('inputName');
+    if (value) {
+      inputName.classList.remove('is-invalid');
+      inputName.classList.add('is-valid');
+    } else {
+      inputName.classList.remove('is-valid');
+      inputName.classList.add('is-invalid');
+    }
+  }
+
+  if (path === 'inputEmail.validate') {
+    const inputEmail = document.getElementById('inputEmail');
+    if (value) {
+      inputEmail.classList.remove('is-invalid');
+      inputEmail.classList.add('is-valid');
+    } else {
+      inputEmail.classList.remove('is-valid');
+      inputEmail.classList.add('is-invalid');
+    }
+  }
 };
 
 export default () => {
   const state = {
-    name: {
-      value: null,
+    inputName: {
+      validate: null,
       error: null,
     },
-    email: {
-      value: null,
+    inputEmail: {
+      validate: null,
       error: null,
     },
     process: 'filling',
     message: null,
   };
 
-  renderForm();
+  initForm();
 
   const watchedState = onChange(state, render(state));
 
   const btn = document.querySelector('.btn');
+  const fields = document.querySelectorAll('input[type="text"]');
 
   btn.addEventListener('click', async () => {
     try {
@@ -41,5 +65,13 @@ export default () => {
         'Problems with sending data to the server. Check your internet connection',
       );
     }
+  });
+
+  fields.forEach((field) => {
+    field.addEventListener('input', (event) => {
+      const fieldName = event.target.id;
+      const { value } = event.target;
+      watchedState[fieldName].validate = mappingValidate[fieldName](value);
+    });
   });
 };
